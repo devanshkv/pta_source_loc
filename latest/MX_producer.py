@@ -22,14 +22,15 @@ time=np.load("single.tim.npy")
 
 norm_cos=0.0
 norm_sin=0.0
+s_f=float(1e-16)
 dt=time[1]-time[0]
-f=float(10e-9)
+f=float(15e-8)
 len_time=len(time)
-
+print len_time
 
 for i in xrange(len(time)):
-    norm_sin+=np.power(np.sin(time[i]),2)/len_time#(2*np.pi*f*time[i]),2)
-    norm_cos+=np.power(np.cos(time[i]),2)/len_time#(2*np.pi*f*time[i]),2)
+    norm_sin+=np.power(np.sin(2.0*np.pi*f*time[i]),2)/len_time#(2*np.pi*f*time[i]),2)
+    norm_cos+=np.power(np.cos(2.0*np.pi*f*time[i]),2)/len_time#(2*np.pi*f*time[i]),2)
 
 print "normalizing fator : ",norm_cos,norm_sin
 
@@ -42,9 +43,9 @@ def M_maker(T,P,theta,phi,n):
     #F_c F_s
     N=np.zeros((P.shape))
     for i in xrange(len(theta)):
-        L+=(np.power(F_c_F_s.F_c(theta[i],phi[i],T,P),2)*norm_sin)
-        M+=(np.power(F_c_F_s.F_s(theta[i],phi[i],T,P),2)*norm_sin)
-        N+=((F_c_F_s.F_c(theta[i],phi[i],T,P)*F_c_F_s.F_s(theta[i],phi[i],T,P))*norm_sin)
+        L+=(np.power(F_c_F_s.F_c(theta[i],phi[i],T,P),2)*norm_sin)/s_f
+        M+=(np.power(F_c_F_s.F_s(theta[i],phi[i],T,P),2)*norm_sin)/s_f
+        N+=((F_c_F_s.F_c(theta[i],phi[i],T,P)*F_c_F_s.F_s(theta[i],phi[i],T,P))*norm_sin)/s_f
     Mat_test=np.zeros((4*n,4*n,len(T),len(T)/2 +1))
     for i in xrange(4*n-1):
             if(Mat_test[i,i].all() == 0.0):
@@ -59,7 +60,6 @@ def M_maker(T,P,theta,phi,n):
 def X_maker(T,P,theta,phi,n):
     res=np.load("single.res.npy")
     time=np.load("single.tim.npy")
-    f=float(10e-9)
     y=len(theta)
     z=len(T)
     x=np.zeros((4*n,z,z/2 + 1))
@@ -68,10 +68,10 @@ def X_maker(T,P,theta,phi,n):
             F_c=F_c_F_s.F_c(theta[j],phi[j],T,P)
             F_s=F_c_F_s.F_s(theta[j],phi[j],T,P)
             for i in xrange(len(time)):
-                x[k+0]+=res[i,j]*F_c*np.sin(time[i])/len_time#(2*np.pi*f*time[i])
-                x[k+1]+=res[i,j]*F_s*np.sin(time[i])/len_time#(2*np.pi*f*time[i])
-                x[k+2]+=res[i,j]*F_c*np.cos(time[i])/len_time#(2*np.pi*f*time[i])
-                x[k+3]+=res[i,j]*F_s*np.cos(time[i])/len_time#(2*np.pi*f*time[i])
+                x[k+0]+=res[i,j]*F_c*np.sin(2*np.pi*f*time[i])/(len_time*s_f)#(2*np.pi*f*time[i])
+                x[k+1]+=res[i,j]*F_s*np.sin(2*np.pi*f*time[i])/(len_time*s_f)#(2*np.pi*f*time[i])
+                x[k+2]+=res[i,j]*F_c*np.cos(2*np.pi*f*time[i])/(len_time*s_f)#(2*np.pi*f*time[i])
+                x[k+3]+=res[i,j]*F_s*np.cos(2*np.pi*f*time[i])/(len_time*s_f)#(2*np.pi*f*time[i])
     return(x)
 
 
@@ -107,14 +107,14 @@ def Z_maker(T,P,theta,phi,n):
             F_DP_c=F_c_F_s.F_plus_DP(theta[j],phi[j],T,P,DPtheta)
             F_DP_s=F_c_F_s.F_cros_DP(theta[j],phi[j],T,P,DPtheta)
             for i in xrange(len(time)):
-                z1 += res[i,j]*F_DP_c*np.cos(time[i])/len_time#/norm_cos
-                z2 += res[i,j]*F_DP_c*np.sin(time[i])/len_time#/norm_sin
-                z3 += res[i,j]*F_DP_s*np.cos(time[i])/len_time#/norm_cos
-                z4 += res[i,j]*F_DP_s*np.sin(time[i])/len_time#/norm_sin
+                z1 += res[i,j]*F_DP_c*np.cos(2.0*np.pi*f*time[i])/(len_time*s_f)
+                z2 += res[i,j]*F_DP_c*np.sin(2.0*np.pi*f*time[i])/(len_time*s_f)
+                z3 += res[i,j]*F_DP_s*np.cos(2.0*np.pi*f*time[i])/(len_time*s_f)
+                z4 += res[i,j]*F_DP_s*np.sin(2.0*np.pi*f*time[i])/(len_time*s_f)
         denL =np.power(Mod_F_DP_c,2)
         denR =np.power(Mod_F_DP_s,2)
-        zL+=np.divide(np.power(z1,2)+np.power(z2,2),(2.0*denL*norm_sin))
-        zR+=np.divide(np.power(z3,2)+np.power(z4,2),(2.0*denR*norm_cos))
+        zL+=np.divide(np.power(z1,2)+np.power(z2,2),(2.0*denL*norm_sin/s_f))
+        zR+=np.divide(np.power(z3,2)+np.power(z4,2),(2.0*denR*norm_cos/s_f))
         pL+=-np.arctan2(z1,z2)
         pR+=-np.arctan2(z3,z4)
         return(zL+zR,zL,zR,pL,pR)
