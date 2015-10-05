@@ -3,6 +3,7 @@
 #########################################################
 #                                                       #
 #              log likelihood calculator                #
+#           F Statistic Method Babak et. al 2012        #
 #               Written by : Devansh Agarwal            #
 #               devansh@iisertvm.ac.in                  #
 #                                                       #

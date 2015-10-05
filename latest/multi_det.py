@@ -3,6 +3,7 @@
 #########################################################
 #                                                       #
 #              log likelihood calculator                #
+#               Synth. Stream approach                  #
 #               Written by : Devansh Agarwal            #
 #               devansh@iisertvm.ac.in                  #
 #                                                       #
