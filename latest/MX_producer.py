@@ -101,7 +101,6 @@ def Z_maker(T,P,theta,phi,n):
     pL=np.zeros((P.shape))
     pR=np.zeros((P.shape))
     DPtheta=F_c_F_s.DP_theta(theta,phi,T,P)
-    print "Computing Z"
     for k in xrange(n):
         for j in xrange(y):
             F_DP_c=F_c_F_s.F_plus_DP(theta[j],phi[j],T,P,DPtheta)

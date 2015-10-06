@@ -19,7 +19,7 @@ import MX_producer
 import random
 
 #number of grid points
-x=100
+#x=100
 
 #read the pulsar locations
 f= open('pulsar.loc','r')
@@ -45,8 +45,13 @@ n=len(theta)
 
 
 # Theta phi-grid
-t=np.linspace(0, np.pi, num=x)
-p=np.linspace(0,2*np.pi,num=2*x)
+
+t=np.load('theta.grid.npy')
+p=np.load('phi.grid.npy')
+
+x=len(t)
+#t=np.linspace(0, np.pi, num=x)
+#p=np.linspace(0,2*np.pi,num=2*x)
 
 #read the pulsar locations
 g= open('source.loc','r')
@@ -71,14 +76,14 @@ print 'Pulsar locations read'
 s_theta=np.array(s_theta)
 s_phi=np.array(s_phi)
 
-#theta_area=[]
-#phi_area=[]
-#area_val=(0.17453292519*3)
-#for i in range(100):
-#	theta_area.append(random.uniform(s_theta-area_val, s_theta+area_val))
-#	phi_area.append(random.uniform(s_phi-area_val, s_phi+area_val))
-#
-#[T_area,P_area]=np.meshgrid(theta_area,phi_area)
+theta_area=[]
+phi_area=[]
+area_val=(0.17453292519*3)
+for i in range(100):
+	theta_area.append(random.uniform(s_theta-area_val, s_theta+area_val))
+	phi_area.append(random.uniform(s_phi-area_val, s_phi+area_val))
+
+[T_area,P_area]=np.meshgrid(theta_area,phi_area)
 
 #include the actual source locations too!
 
@@ -94,9 +99,11 @@ ind_p=p.tolist().index(s_phi)
 print 'Calculating Log Likelihood pattern'
 
 #the heart of the program
+print "Computing Z"
+
 [z,zL,zR,pL,pR]=MX_producer.Z_maker(T,P,theta,phi,1)
 
-#[z_area,a,b]=MX_producer.Z_maker(T_area,P_area,theta,phi,1)
+[z_area,a,b,c,d]=MX_producer.Z_maker(T_area,P_area,theta,phi,1)
 
 #Post calculations, for recovery of physical parameters
 i,j = np.unravel_index(z.argmax(), z.shape)
@@ -104,7 +111,7 @@ z_L=zL[i,j]
 z_R=zR[i,j]
 p_L=pL[i,j]
 p_R=pR[i,j]
-
+area=float(np.sum((z_area > 0.85*(z[i,j]))))/np.prod(z_area.shape)
 #print F_c_F_s.F_dot(theta,phi,T,P)
 Mod_F_c=(F_c_F_s.Mod_F_DP_c(theta,phi,T,P)[i,j])
 Mod_F_s=(F_c_F_s.Mod_F_DP_s(theta,phi,T,P)[i,j])
@@ -118,7 +125,7 @@ print "rho_R^2      : ",z_R
 print "phase_L      : ",p_L
 print "phase_R      : ",p_R
 print "Recov. Loc   : ",T[i,j],P[i,j]
-
+print "Area > 85%   : ",area
 
 #recovering the initial parameters
 Y=(np.sqrt(z_L)*Mod_F_s*complex(np.cos(p_L),np.sin(p_L)))/(np.sqrt(z_R)*Mod_F_c*complex(np.cos(p_R),np.sin(p_R)))
