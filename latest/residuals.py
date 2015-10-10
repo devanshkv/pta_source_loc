@@ -14,10 +14,21 @@ Generates time stamp and save them as .tim file
 #libraries
 import numpy as np
 import F_c_F_s
+import argparse
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-i', '--inc', help='inclination angle', type=float, default=0.0)
+parser.add_argument('-p', '--psi', help='polarization angle', type=float, default=0.0)
+parser.add_argument('-ph', '--phi0', help='initial phase of binary', type=float, default=0.0)
+parser.add_argument('-s', '--snr', help='SNR', type=float, default=15.0)
+parser.add_argument('-f', '--freq', help='frequency (nHz)', type=float, default=150.0)
+parser.add_argument('-l', '--loc', help='pulsar location file', default='pulsar.loc')
+args = parser.parse_args()
+
 
 #read the pulsar locations
-
-f= open('pulsar.loc','r')
+f= open(args.loc,'r')
 
 #pulsar coordinates lists
 phi_p=[]
@@ -67,13 +78,13 @@ phi_s=np.array(phi_s)
 m1  =float(7.0e08)
 m2  =float(2.0e09)
 mc  = ((m1*m2)**(3.0/5.0))/((m1+m2)**(1.0/5.0))
-f   =float(15e-8)
+f   =float(1e-9)*args.freq
 Dl  =float(1e20)
 A   =2.0*(mc**(5.0/3.0))*((np.pi*f)**(2.0/3.0))/Dl
-inc =float(0.0)
-phi0=float(0.0)
-psi =float(0.0)
-snr =float(15.0)
+inc =args.inc
+phi0=args.phi0
+psi =args.psi
+snr =args.snr
 s_f =float(1e-16)
 m=len(theta_p)
 
