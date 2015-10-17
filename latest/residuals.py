@@ -21,8 +21,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-i', '--inc', help='inclination angle', type=float, default=0.0)
 parser.add_argument('-p', '--psi', help='polarization angle', type=float, default=0.0)
 parser.add_argument('-ph', '--phi0', help='initial phase of binary', type=float, default=0.0)
-parser.add_argument('-s', '--snr', help='SNR', type=float, default=15.0)
-parser.add_argument('-f', '--freq', help='frequency (nHz)', type=float, default=150.0)
+parser.add_argument('-s', '--snr', help='SNR', type=float, default=7.0)
+parser.add_argument('-f', '--freq', help='frequency (nHz)', type=float, default=15.0)
 parser.add_argument('-l', '--loc', help='pulsar location file', default='pulsar.loc')
 args = parser.parse_args()
 
@@ -79,13 +79,13 @@ m1  =float(7.0e08)
 m2  =float(2.0e09)
 mc  = ((m1*m2)**(3.0/5.0))/((m1+m2)**(1.0/5.0))
 f   =float(1e-9)*args.freq
-Dl  =float(1e20)
-A   =2.0*(mc**(5.0/3.0))*((np.pi*f)**(2.0/3.0))/Dl
+Dl  =float(1e24)
+A   =2.0*(mc**(5.0/3.0))*((np.pi*f)**(2.0/3.0))/(Dl*2*np.pi*f)
 inc =args.inc
 phi0=args.phi0
 psi =args.psi
 snr =args.snr
-s_f =float(1e-16)
+s_f =float(1e-14)
 m=len(theta_p)
 
 
@@ -102,14 +102,13 @@ for k in range(n_src):
     j+=4
 
 #no. of points
-n=1000
+n=300
 
 #time over which the residuals were collected
-T=np.linspace(1,3.15e8,n)
+T=np.linspace(1,3.1536e8,n)
 
 #delta time
 dt=(T[1]-T[0])
-
 #print "F_c   :", F_c_F_s.F_c(theta_p[0],phi_p[0],theta_s[0],phi_s[0])
 #print "F_s   :", F_c_F_s.F_s(theta_p[0],phi_p[0],theta_s[0],phi_s[0])
 #print "F_plus :", F_c_F_s.F_plus(theta_p[0],phi_p[0],theta_s[0],phi_s[0],psi)
@@ -161,9 +160,15 @@ for l in xrange(n_src):
 
 
 r_r=0.5*np.power(A*r,2).sum(axis=0).sum()/(n*s_f)
-scale_factor=snr**2/r_r
+
+scale_factor=(snr**2/r_r)
+
 scaled_A=A*np.sqrt(scale_factor)
-dist=2.0*(mc**(5.0/3.0))*((np.pi*f)**(2.0/3.0))/scaled_A
+
+dist=2.0*(mc**(5.0/3.0))*((np.pi*f)**(2.0/3.0))/(scaled_A*2*np.pi*f)
+
+#print 2.0*(mc**(5.0/3.0))*((np.pi*f)**(2.0/3.0))/(dist*2*np.pi*f)
+
 print "Parameters"
 print "No. of Pulsar: ",m
 print "Chirp Mass   : ",'%e' %mc
@@ -177,15 +182,19 @@ print "a_i's 	     : ", a*scaled_A
 print "h plus       : ", h_p
 print "h_cros       : ", h_c
 print "SNR          : ", snr
+print "S(f0)        : ", s_f
 
 r=r*scaled_A
 r_r=0.5*np.power(r,2).sum(axis=0).sum()/(n*s_f)
 
 print "0.5*(r || r) : ",r_r
-
-#print n_r,"\n"
+noise_std=np.sqrt(s_f)
+#print noise_std**2
+noise=np.random.normal(0,noise_std,size=r.shape)
+noise_fft=np.fft.fft(noise[:,2])
+#print np.mean(np.abs(noise_fft[0:len(noise_fft)/2])**2)/n
+#print noise,"\n"
 #print r,"\n"
-#print n_r-r
 
-np.save("single.res",r)
+np.save("single.res",r+noise)
 np.save("single.tim",T)

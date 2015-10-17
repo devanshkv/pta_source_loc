@@ -135,7 +135,7 @@ def area(area_val,ret_val_2):
     [T_area,P_area]=np.meshgrid(theta_area,phi_area)
     [z_area,a,b,c,d]=MX_producer.Z_maker(T_area,P_area,theta,phi,1)
     i,j = np.unravel_index(z_area.argmax(), z_area.shape)
-    area=float(np.sum((z_area > 0.85*(z_area[i,j]))))/np.prod(z_area.shape)
+    area=float(np.sum((z_area > 0.85*(z_area[i,j]))))/np.prod(z_area.shape)*900/np.sqrt(z_area[i,j])
     ret_val2.put(area)
 
 if __name__=='__main__':

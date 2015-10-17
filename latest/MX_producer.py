@@ -22,9 +22,9 @@ time=np.load("single.tim.npy")
 
 norm_cos=0.0
 norm_sin=0.0
-s_f=float(1e-16)
+s_f=float(1e-14)
 dt=time[1]-time[0]
-f=float(15e-8)
+f=float(15e-9)
 len_time=len(time)
 print len_time
 
